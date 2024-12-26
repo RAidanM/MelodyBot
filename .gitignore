@@ -3,3 +3,6 @@ venv/*
 
 # Environment variables (potentially sensitive data like API keys)
 .env
+
+# IDE-specific configuration
+.vscode/*
