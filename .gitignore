@@ -1,0 +1,5 @@
+# Virtual environment
+venv/*
+
+# Environment variables (potentially sensitive data like API keys)
+.env
