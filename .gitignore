@@ -1,6 +1,9 @@
 # Virtual environment
 venv/*
 
+# Python generated files
+__pycache__/
+
 # Environment variables (potentially sensitive data like API keys)
 .env
 
