@@ -1,0 +1,4 @@
+services:
+  discord-bot:
+    build: .
+    restart: always

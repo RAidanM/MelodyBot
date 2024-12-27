@@ -1,13 +1,22 @@
+import os
 import logging
-from dotenv import dotenv_values
 import asyncio
 from collections import deque
 from typing import Deque
+from dotenv import load_dotenv
 import discord
 import discord.ext
 import discord.ext.commands
 from audio_player import create_audio_player, UnmappedUrlException, AudioInfo
 
+
+if not os.getenv('PRODUCTION_ENV'):
+    load_dotenv()
+
+command_prefix = os.getenv('COMMAND_PREFIX')
+
+if not command_prefix:
+    raise Exception('COMMAND_PREFIX environment variable is not defined')
 
 logger = logging.getLogger('discord')
 '''Logger for the bot.'''
@@ -17,7 +26,7 @@ logger = logging.getLogger('discord')
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = discord.ext.commands.Bot(command_prefix='!', intents=intents)
+bot = discord.ext.commands.Bot(command_prefix=command_prefix, intents=intents)
 '''The bot.'''
 
 queue: Deque[AudioInfo] = deque()
@@ -32,17 +41,6 @@ stop_signal: bool = False
 '''
 Global boolean variable used to signal to the bot to stop playing and clear the
 queue.
-'''
-
-pause_signal: bool = False
-'''
-Global boolean variable used to signal to the bot to pause the current song.
-'''
-
-resume_signal: bool = False
-'''
-Global boolean variable used to signal to the bot to resume the currently-paused
-song.
 '''
 
 
@@ -224,7 +222,6 @@ async def pause(ctx: discord.ext.commands.Context):
 
     The logic to pause the audio happens in the `play` method.
     '''
-    global pause_signal
 
     logger.info(f'Received pause command from {ctx.author}')
 
@@ -250,8 +247,6 @@ async def pause(ctx: discord.ext.commands.Context):
 
     # Make sure the bot is currently playing something
     if voice_client.is_playing():
-        # Send the pause signal
-        pause_signal = True
         voice_client.pause()
     else:
         await ctx.send('Pause? I\'m not even playing anything!')
@@ -264,7 +259,6 @@ async def resume(ctx: discord.ext.commands.Context):
 
     The logic to resume the audio happens in the `play` method.
     '''
-    global resume_signal
 
     logger.info(f'Received resume command from {ctx.author}')
 
@@ -291,19 +285,17 @@ async def resume(ctx: discord.ext.commands.Context):
     # Make sure the bot is currently paused
     if voice_client.is_paused():
         voice_client.resume()
-        # Send the resume signal
-        resume_signal = True
     else:
         await ctx.send('Resume? I\'m not even paused!')
 
 
 if __name__ == '__main__':
-    # Get environment variables from .env file
-    config = dotenv_values(".env")
+    # Get bot token from environment
+    bot_token = os.getenv('BOT_TOKEN')
 
     # Make sure the `BOT_TOKEN` environment variable is set
-    if 'BOT_TOKEN' not in config or not config['BOT_TOKEN']:
-        raise Exception('BOT_TOKEN must be defined in .env file')
+    if not bot_token:
+        raise Exception('BOT_TOKEN environment variable is not defined')
 
     # Run the bot
-    bot.run(config['BOT_TOKEN'])
+    bot.run(bot_token)

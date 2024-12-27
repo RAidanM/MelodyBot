@@ -1,0 +1,37 @@
+# Place this file in the directory
+#   `/etc/systemd/system/`
+# then execute the command
+#   `sudo systemctl daemon-reload`
+#
+# Make sure the following environment variables are set in the environment file:
+#   - BOT_TOKEN            # The bot token generated from Discord.
+#   - COMMAND_PREFIX       # The prefix for entering commands.
+#   - PRODUCTION_ENV=true  # Makes sure main.py knows where to get environment
+#                            variables from.
+#
+# Start the service with the command
+#   `sudo systemctl start melody.service`
+# Stop the service with the command
+#   `sudo systemctl stop melody.service`
+# Enable (run on system start) the service with the command
+#   `sudo systemctl enable melody.service`
+# Disable (not run on system start) the service with the command
+#   `sudo systemctl disable melody.service`
+# View logs for the service with
+#   `journalctl -u melody.service`
+
+[Unit]
+Description=Melody Discord Bot Docker Compose Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+WorkingDirectory=/path/to/melody              # Change to Melody's path
+ExecStart=/path/to/docker compose up --build  # Change to Docker's binary path
+ExecStop=/path/to/docker compose down         # Change to Docker's binary path
+Restart=always
+EnvironmentFile=/etc/melody/env               # Change to Melody's environment
+                                              # variables
+
+[Install]
+WantedBy=multi-user.target
